@@ -56,7 +56,7 @@ spec:
           capacity: 10Gi
           homeMountPath: /home/jovyan/work
           dynamic:
-            storageClass: csi-cinder-sc-delete
+            #storageClass: <ENTER STORAGE CLASS HERE>
             pvcNameTemplate: claim-{username}{servername}
             volumeNameTemplate: volume-{username}{servername}
             storageAccessModes: [ReadWriteOnce]
