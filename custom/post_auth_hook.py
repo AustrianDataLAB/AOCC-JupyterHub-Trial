@@ -8,8 +8,6 @@ import json
 
 async def my_post_auth_hook(authenticator: Authenticator, handler, authentication):
     # failsave auth_state
-
-    print("AUTH STATE!!!!!!!!!!!!!!!!!!!!!!!!!!")
     
     authentication['groups']= ["test_course:instructor","test_course2:instructor","test_course:student","test_course2:student"]
 
@@ -28,5 +26,4 @@ async def my_post_auth_hook(authenticator: Authenticator, handler, authenticatio
                             "groups": [groupname]}
                 roles_list.append(role)
     authentication['roles'] = roles_list 
-    print("DONe", authentication['roles'])
     return authentication

@@ -8,8 +8,7 @@ def setup_hub(c):
   c.JupyterHub.authenticator_class = DummyAuthenticator
   
   # users in `admin_group` group will be marked as admin
-  #c.DummyAuthenticator.admin_groups = ['admin_group']
-  c.DummyAuthenticator.admin_users= ["testadm"]
+  c.DummyAuthenticator.admin_users= ["testadmin"]
   c.DummyAuthenticator.refresh_pre_spawn = True
   c.DummyAuthenticator.enable_auth_state = True
   c.DummyAuthenticator.manage_groups = True
