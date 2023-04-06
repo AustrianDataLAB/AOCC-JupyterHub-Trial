@@ -1,0 +1,348 @@
+---
+
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name:  aocc-jupyterhub-trial
+  namespace:  kube-system
+spec:
+  repo: https://jupyterhub.github.io/helm-chart/
+  chart: jupyterhub
+  version: 2.0.0
+  targetNamespace:  aocc-jupyterhub-trial
+  valuesContent: |-  
+     
+      hub:
+        image:
+          name: ghcr.io/austriandatalab/jupyterhub
+          tag: jupyterhub-3.0.0-aocc-0.0.4
+          pullPolicy: Always
+        db:
+          type: sqlite-memory #switch to sqlite-pvc if you want database to be persistent
+        service:
+          type: ClusterIP
+        cookieSecret: 3127d46e6afe0252787339be67d6a8c5e4387b3ea3f575a1f41dc6a36b0e9ed6
+        extraVolumes: 
+        - name: custom-config-volume
+          configMap:
+            name: custom-config
+        extraVolumeMounts:
+        - name: custom-config-volume
+          mountPath: "/usr/local/etc/jupyterhub/custom"
+          readOnly: true
+        extraConfig:
+          setup: |
+            c.KubeSpawner.debug = True
+            c.KubeSpawner.events_enabled = True
+            from custom import setup_hub
+            setup_hub(c)
+
+      ingress:
+        enabled: true
+        annotations:
+          <ENTER ANNOTATIONS FOR CERT MANAGER HERE>
+        hosts:
+          - <ENTER INGRESS HERE>
+        tls:
+          - hosts:
+              - <ENTER INGRESS HERE>
+            secretName: jupyter-trial-tls
+
+      singleuser:
+        startTimeout: 900
+        defaultUrl: /lab
+        storage:
+          type: dynamic
+          capacity: 10Gi
+          homeMountPath: /home/jovyan/work
+          dynamic:
+            storageClass: csi-cinder-sc-delete
+            pvcNameTemplate: claim-{username}{servername}
+            volumeNameTemplate: volume-{username}{servername}
+            storageAccessModes: [ReadWriteOnce]
+        cpu:
+          limit: 1
+          guarantee: 0.05
+        memory:
+          limit: 2G
+        extraAnnotations:
+          kubernetes.io/ingress-bandwidth: 1M
+          kubernetes.io/egress-bandwidth: 1M
+          seccomp.security.alpha.kubernetes.io/pod: docker/default
+
+        networkTools: {}
+        cloudMetadata:
+          blockWithIptables: false
+
+          
+
+
+## Needed for Hub to retrieve Profiles
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app: jupyterhub
+    component: hub
+  name: hub-profiles
+  namespace: aocc-jupyterhub-trial
+rules:
+- apiGroups:
+  - "hub.austrianopensciencecloud.org"
+  resources:
+  - profiles
+  verbs:
+  - get
+  - watch
+  - list
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app: jupyterhub
+    component: hub
+  name: hub-profiles
+  namespace: aocc-jupyterhub-trial
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: hub-profiles
+subjects:
+- kind: ServiceAccount
+  name: hub
+  namespace: aocc-jupyterhub-trial
+
+
+## Will be improved over Time:
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.0
+  creationTimestamp: null
+  name: profiles.hub.austrianopensciencecloud.org
+spec:
+  group: hub.austrianopensciencecloud.org
+  names:
+    kind: Profile
+    listKind: ProfileList
+    plural: profiles
+    singular: profile
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Profile is the Schema for the profiles API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ProfileSpec defines the desired state of Profile
+            properties:
+              allowed_groups:
+                items:
+                  type: string
+                type: array
+              description:
+                type: string
+              display_name:
+                type: string
+              kubespawner_override:
+                properties:
+                  cpu_guarantee:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
+                  cpu_limit:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
+                  environment:
+                    x-kubernetes-preserve-unknown-fields: true
+                  extra_annotations:
+                    x-kubernetes-preserve-unknown-fields: true
+                  extra_container_config:
+                    x-kubernetes-preserve-unknown-fields: true
+                  extra_containers:
+                    x-kubernetes-preserve-unknown-fields: true
+                  extra_labels:
+                    x-kubernetes-preserve-unknown-fields: true
+                  extra_pod_config:
+                    x-kubernetes-preserve-unknown-fields: true
+                  extra_resource_guarantees:
+                    x-kubernetes-preserve-unknown-fields: true
+                  extra_resource_limits:
+                    x-kubernetes-preserve-unknown-fields: true
+                  fs_gid:
+                    x-kubernetes-preserve-unknown-fields: true
+                  gid:
+                    x-kubernetes-preserve-unknown-fields: true
+                  image:
+                    type: string
+                  image_pull_policy:
+                    x-kubernetes-preserve-unknown-fields: true
+                  image_pull_secrets:
+                    x-kubernetes-preserve-unknown-fields: true
+                  init_containers:
+                    x-kubernetes-preserve-unknown-fields: true
+                  lifecycle_hooks:
+                    x-kubernetes-preserve-unknown-fields: true
+                  mem_guarantee:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
+                  mem_limit:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
+                  node_affinity_preferred:
+                    x-kubernetes-preserve-unknown-fields: true
+                  node_affinity_required:
+                    x-kubernetes-preserve-unknown-fields: true
+                  node_selector:
+                    x-kubernetes-preserve-unknown-fields: true
+                  pod_affinity_preferred:
+                    x-kubernetes-preserve-unknown-fields: true
+                  pod_affinity_required:
+                    x-kubernetes-preserve-unknown-fields: true
+                  pod_anti_affinity_preferred:
+                    x-kubernetes-preserve-unknown-fields: true
+                  pod_anti_affinity_required:
+                    x-kubernetes-preserve-unknown-fields: true
+                  pod_security_context:
+                    x-kubernetes-preserve-unknown-fields: true
+                  uid:
+                    x-kubernetes-preserve-unknown-fields: true
+                type: object
+              profile_options:
+                additionalProperties:
+                  properties:
+                    choices:
+                      additionalProperties:
+                        properties:
+                          display_name:
+                            type: string
+                          kubespawner_override:
+                            properties:
+                              cpu_guarantee:
+                                anyOf:
+                                - type: integer
+                                - type: string
+                                pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                x-kubernetes-int-or-string: true
+                              cpu_limit:
+                                anyOf:
+                                - type: integer
+                                - type: string
+                                pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                x-kubernetes-int-or-string: true
+                              environment:
+                                x-kubernetes-preserve-unknown-fields: true
+                              extra_annotations:
+                                x-kubernetes-preserve-unknown-fields: true
+                              extra_container_config:
+                                x-kubernetes-preserve-unknown-fields: true
+                              extra_containers:
+                                x-kubernetes-preserve-unknown-fields: true
+                              extra_labels:
+                                x-kubernetes-preserve-unknown-fields: true
+                              extra_pod_config:
+                                x-kubernetes-preserve-unknown-fields: true
+                              extra_resource_guarantees:
+                                x-kubernetes-preserve-unknown-fields: true
+                              extra_resource_limits:
+                                x-kubernetes-preserve-unknown-fields: true
+                              fs_gid:
+                                x-kubernetes-preserve-unknown-fields: true
+                              gid:
+                                x-kubernetes-preserve-unknown-fields: true
+                              image:
+                                type: string
+                              image_pull_policy:
+                                x-kubernetes-preserve-unknown-fields: true
+                              image_pull_secrets:
+                                x-kubernetes-preserve-unknown-fields: true
+                              init_containers:
+                                x-kubernetes-preserve-unknown-fields: true
+                              lifecycle_hooks:
+                                x-kubernetes-preserve-unknown-fields: true
+                              mem_guarantee:
+                                anyOf:
+                                - type: integer
+                                - type: string
+                                pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                x-kubernetes-int-or-string: true
+                              mem_limit:
+                                anyOf:
+                                - type: integer
+                                - type: string
+                                pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                x-kubernetes-int-or-string: true
+                              node_affinity_preferred:
+                                x-kubernetes-preserve-unknown-fields: true
+                              node_affinity_required:
+                                x-kubernetes-preserve-unknown-fields: true
+                              node_selector:
+                                x-kubernetes-preserve-unknown-fields: true
+                              pod_affinity_preferred:
+                                x-kubernetes-preserve-unknown-fields: true
+                              pod_affinity_required:
+                                x-kubernetes-preserve-unknown-fields: true
+                              pod_anti_affinity_preferred:
+                                x-kubernetes-preserve-unknown-fields: true
+                              pod_anti_affinity_required:
+                                x-kubernetes-preserve-unknown-fields: true
+                              pod_security_context:
+                                x-kubernetes-preserve-unknown-fields: true
+                              uid:
+                                x-kubernetes-preserve-unknown-fields: true
+                            type: object
+                        required:
+                        - display_name
+                        - kubespawner_override
+                        type: object
+                      type: object
+                    display_name:
+                      type: string
+                  required:
+                  - choices
+                  - display_name
+                  type: object
+                type: object
+              slug:
+                type: string
+            required:
+            - display_name
+            - slug
+            type: object
+          status:
+            description: ProfileStatus defines the observed state of Profile
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
