@@ -16,7 +16,7 @@ This JupyterHub demo uses DockerSpawner to deploy custom notebook images for the
 
 `docker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock --net jupyterhub --name aocc-jupyterhub-trial -p 8000:8000 ghcr.io/austriandatalab/aocc_jupyterhub:jupyterhub-aocc-trial-3.1.1 jupyterhub -f /etc/jupyterhub/jupyterhub_config.py --ip 0.0.0.0 --port 8000 --DockerSpawner.image ghcr.io/austriandatalab/aocc_openscience_mage:sha-55e857d`
 
-**Customization:** If you want to run the JupyterHub container with another JupyterLab custom image, replace the `DockerSpawner.image` value with the desired image (example: `--DockerSpawner.image jupyter/base-notebook`)
+**Customization:** If you want to run the JupyterHub container with another JupyterLab custom image, replace the `--DockerSpawner.image` value with the desired image (example: `--DockerSpawner.image jupyter/base-notebook`)
 
 3. JupyterHub should now be deployed in docker and it can be accessed on `localhost:8000`.
 
