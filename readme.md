@@ -7,9 +7,9 @@ This JupyterHub demo uses DockerSpawner to deploy custom notebook images for the
 1. First create `docker network create jupyterhub`
 
 2. Pull the images so that they can be used for the demo:
-    * `docker pull ghcr.io/austriandatalab/aocc_jupyterhub:jupyterhub-trial-3.1.1`
+    * AOCC JupyterHub image: `docker pull ghcr.io/austriandatalab/aocc_jupyterhub:jupyterhub-trial-3.1.1`
 
-    * `docker pull ghcr.io/austriandatalab/aocc_openscience_mage:sha-55e857d`
+    * AOCC Mage JupyterLab image: `docker pull ghcr.io/austriandatalab/aocc_openscience_mage:sha-55e857d`
     (note: This image may take longer to download, since it contains the 3D visualization module for JupyterLab)
 
 2. Run the following command to start the jupyterhub container:
