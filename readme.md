@@ -1,4 +1,5 @@
 # AOCC JupyterHub Trial
+## Local JupyterHub deployment using DockerSpawner
 This JupyterHub demo uses DockerSpawner to deploy custom notebook images for the user to use.
 ### 1. Requirements:
 * Have docker installed
