@@ -6,70 +6,24 @@ items:
   - apiVersion: hub.austrianopensciencecloud.org/v1alpha1
     kind: Profile
     metadata:
-      name: grader-dev-1cpu-2gram
+      name: openscience-mage-lab
       namespace: aocc-jupyterhub-trial
     spec: 
-      slug: grader-dev-1cpu-2gram
-      display_name: "DEV: Python with Grader Service: 1 CPU core & 2GB RAM"
-      description: "You will have a Python Kernel installed and the grader service enabled."
+      slug: openscience-mage-lab
+      display_name: "AOCC Openscience Mage Lab"
       kubespawner_override:
-        image: ghcr.io/tu-wien-datalab/grader-service-labextension:dev
+        image: ghcr.io/austriandatalab/aocc_openscience_mage:sha-55e857d
         image_pull_policy: Always
   - apiVersion: hub.austrianopensciencecloud.org/v1alpha1
     kind: Profile
     metadata:
-      name: grader-1cpu-2gram
+      name: default-notebook
       namespace: aocc-jupyterhub-trial
     spec: 
-      slug: grader-1cpu-2gram
-      display_name: "Python with Grader Service: 1 CPU core & 2GB RAM"
-      description: "You will have a Python Kernel installed and the grader service enabled."
+      slug: default-notebook
+      display_name: "Python base notebook"
       kubespawner_override:
-        image: ghcr.io/tu-wien-datalab/grader-service-labextension:main
-  - apiVersion: hub.austrianopensciencecloud.org/v1alpha1
-    kind: Profile
-    metadata:
-      name: base-notebook-1cpu-2gram
-      namespace: aocc-jupyterhub-trial
-    spec: 
-      slug: base-notebook-1cpu-2gram
-      display_name: "Python: 1 CPU core & 2GB RAM"
-      description: "You will have a Python Kernel installed."
-      kubespawner_override:
-        image: jupyter/base-notebook:lab-3.4.3
-  - apiVersion: hub.austrianopensciencecloud.org/v1alpha1
-    kind: Profile
-    metadata:
-      name: cpp-notebook-1cpu-2gram
-      namespace: aocc-jupyterhub-trial
-    spec: 
-      slug: cpp-notebook-1cpu-2gram
-      display_name: "C++: 1 CPU core & 2GB RAM"
-      description: "You will have a C++ Kernel installed."
-      kubespawner_override:
-        image: adlsregistrysbx.azurecr.io/jupyter/cpp-notebook:latest
-  - apiVersion: hub.austrianopensciencecloud.org/v1alpha1
-    kind: Profile
-    metadata:
-      name: r-notebook-1cpu-2gram
-      namespace: aocc-jupyterhub-trial
-    spec: 
-      slug: r-notebook-1cpu-2gram
-      display_name: "R: 1 CPU core & 2GB RAM"
-      description: "You will have a R Kernel installed."
-      kubespawner_override:
-        image: adlsregistrysbx.azurecr.io/jupyter/r-notebook:latest
-  - apiVersion: hub.austrianopensciencecloud.org/v1alpha1
-    kind: Profile
-    metadata:
-      name: java-notebook-1cpu-2gram
-      namespace: aocc-jupyterhub-trial
-    spec: 
-      slug: java-notebook-1cpu-2gram
-      display_name: "Java: 1 CPU core & 2GB RAM"
-      description: "You will have a Java Kernel installed."
-      kubespawner_override:
-        image: adlsregistrysbx.azurecr.io/jupyter/java-notebook:latest
+        image: jupyter/base-notebook
 
 ---
 
