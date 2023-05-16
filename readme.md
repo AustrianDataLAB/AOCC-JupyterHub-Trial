@@ -1,9 +1,11 @@
 # AOCC JupyterHub Trial
-## Local JupyterHub deployment using DockerSpawner
+## 1. Local JupyterHub deployment using DockerSpawner
+(Recommended. For deploying JupyterHub using the contents of this repo in a Kubernetes cluster, see section 2.)
+
 This JupyterHub demo uses DockerSpawner to deploy custom notebook images for the user to use.
-### 1. Requirements:
+### 1.1. Requirements:
 * Have docker installed
-### 2. Installation:
+### 1.2. Installation:
 
 1. First create `docker network create jupyterhub`
 
@@ -19,12 +21,17 @@ This JupyterHub demo uses DockerSpawner to deploy custom notebook images for the
 
 **Customization:** If you want to run the JupyterHub container with another JupyterLab custom image, replace the `--DockerSpawner.image` value with the desired image (example: `--DockerSpawner.image jupyter/base-notebook`)
 
-3. JupyterHub should now be deployed in docker and it can be accessed on `localhost:8000`.
+1.3. JupyterHub should now be deployed in docker and it can be accessed on `localhost:8000`.
 
 This deployment uses a DummyAuthenticator, so any username/password combination works. 
 
 For admin rights, sign in with the `testadmin` user.
 
 When prompted to enter the notebook image when spawning the server, just press enter and wait for docker to deploy the jupyter lab server.
+
+## 2. Deployment on a Kubernetes Cluster
+
+1. Fill the missing settings in `aocc_values.yml`. The ingress and storage need to be set depending on your actual cluster settings.
+2. Run `install.sh`
 
 ### _Enjoy testing the AOCC JupyterHub!_

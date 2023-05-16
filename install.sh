@@ -10,10 +10,7 @@ done
 echo $FILES
 kubectl create ns aocc-jupyterhub-trial || echo pass
 kubectl delete sa default -n aocc-jupyterhub-trial || echo pass
-kubectl -n aocc-jupyterhub-trial delete configmap custom-config || echo pass
 kubectl -n aocc-jupyterhub-trial create configmap custom-config $FILES
-
-kubectl rollout restart deployments hub -n aocc-jupyterhub-trial || echo pass
 
 kubectl apply -f aocc_values.yml
 kubectl apply -f aocc_profiles.yml
