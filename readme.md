@@ -12,12 +12,12 @@ This JupyterHub demo uses DockerSpawner to deploy custom notebook images for the
 2. Pull the images so that they can be used for the demo:
     * AOCC JupyterHub image: `docker pull ghcr.io/austriandatalab/aocc_jupyterhub:jupyterhub-trial-3.1.1`
 
-    * AOCC Mage JupyterLab image: `docker pull ghcr.io/austriandatalab/aocc_openscience_mage:sha-55e857d`
+    * AOCC Mage JupyterLab image: `docker pull ghcr.io/austriandatalab/aocc_openscience_mage:sha-5f20939`
     (note: This image may take longer to download, since it contains the 3D visualization module for JupyterLab)
 
 2. Run the following command to start the jupyterhub container:
 
-`docker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock --net jupyterhub --name aocc-jupyterhub-trial -p 8000:8000 ghcr.io/austriandatalab/aocc_jupyterhub:jupyterhub-trial-3.1.1 jupyterhub -f /etc/jupyterhub/jupyterhub_config.py --ip 0.0.0.0 --port 8000 --DockerSpawner.image ghcr.io/austriandatalab/aocc_openscience_mage:sha-55e857d`
+`docker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock --net jupyterhub --name aocc-jupyterhub-trial -p 8000:8000 ghcr.io/austriandatalab/aocc_jupyterhub:jupyterhub-trial-3.1.1 jupyterhub -f /etc/jupyterhub/jupyterhub_config.py --ip 0.0.0.0 --port 8000 --DockerSpawner.image ghcr.io/austriandatalab/aocc_openscience_mage:sha-5f20939`
 
 **Customization:** If you want to run the JupyterHub container with another JupyterLab custom image, replace the `--DockerSpawner.image` value with the desired image (example: `--DockerSpawner.image jupyter/base-notebook`)
 
